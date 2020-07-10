@@ -15,7 +15,7 @@ import (
 const (
 	EASYCALL_ETCD_SERVICE_PATH     = "/easycall/services"
 	EASYCALL_ETCD_CONFIG_PATH      = "/easycall/configs"
-	EASYCALL_CONFIG_PATH           = "./conf"
+	EASYCALL_CONFIG_PATH           = "conf"
 	EASYCALL_CONFIG_CHECK_INTERVAL = 60
 	EASYCALL_WRITE_QUEUE_SIZE      = 100
 	ETCD_KEEPLIVE_TIMEOUT          = 10
