@@ -10,7 +10,7 @@ import (
 	"github.com/starjiang/elog"
 )
 
-//ServiceInfo for EasyServiceContext
+//ServiceInfo for ServiceContext
 type ServiceInfo struct {
 	name    string
 	port    int
@@ -25,25 +25,25 @@ type MiddlewareInfo struct {
 	Next       *MiddlewareInfo
 }
 
-//EasyServiceContext for Easycall
-type EasyServiceContext struct {
+//ServiceContext for Easycall
+type ServiceContext struct {
 	serviceList map[string]*ServiceInfo
 	endpoints   []string
 	middlewares map[string][]*MiddlewareInfo
 }
 
-func NewEasyServiceContext(endpoints []string) *EasyServiceContext {
+func NewServiceContext(endpoints []string) *ServiceContext {
 
-	return &EasyServiceContext{make(map[string]*ServiceInfo, 0), endpoints, make(map[string][]*MiddlewareInfo, 0)}
+	return &ServiceContext{make(map[string]*ServiceInfo, 0), endpoints, make(map[string][]*MiddlewareInfo, 0)}
 }
 
-func (svc *EasyServiceContext) CreateService(name string, port int, service interface{}, weight int) error {
+func (svc *ServiceContext) CreateService(name string, port int, service interface{}, weight int) error {
 	info := &ServiceInfo{name, port, weight, service}
 	svc.serviceList[name] = info
 	return nil
 }
 
-func (svc *EasyServiceContext) AddMiddleware(name string, middleware MiddlewareFunc) {
+func (svc *ServiceContext) AddMiddleware(name string, middleware MiddlewareFunc) {
 	list := svc.middlewares[name]
 	if list == nil {
 		list = make([]*MiddlewareInfo, 0)
@@ -59,7 +59,7 @@ func (svc *EasyServiceContext) AddMiddleware(name string, middleware MiddlewareF
 	svc.middlewares[name] = list
 }
 
-func (svc *EasyServiceContext) StartAndWait() error {
+func (svc *ServiceContext) StartAndWait() error {
 
 	c := make(chan os.Signal)
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)

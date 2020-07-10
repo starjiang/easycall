@@ -62,7 +62,7 @@ func init() {
 func main() {
 	flag.Parse()
 	defer elog.Flush()
-	context := easycall.NewEasyServiceContext([]string{"127.0.0.1:2379"})
+	context := easycall.NewServiceContext([]string{"127.0.0.1:2379"})
 	context.CreateService("profile", port, &ProfileService{}, 100)
 	context.CreateService("profile1", port+1, &ProfileService{}, 100)
 	context.AddMiddleware("profile", CheckLogin)
