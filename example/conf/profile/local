@@ -1,0 +1,14 @@
+#service config
+config.name=profile
+easycall.userList=10001,1002,10033
+easycall.name="xxxxx" #service name
+easycall.isExsit=true
+easycall.service=
+easycall.port=8004
+#service threadNum
+#easycall.threadNum=32
+easycall.failRate=1.56
+easycall.userMap1=starjiang:false,starjiang1:true
+easycall.userMap2=starjiang:1.55,starjiang1:1.2222
+easycall.userMap3=starjiang:hello,starjiang1:world
+easycall.userMap=starjiang:10001,starjiang1:1002,starjiang3:10004
