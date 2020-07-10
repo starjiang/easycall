@@ -41,6 +41,7 @@ func HttpGet(url string) ([]byte, error) {
 func GetLocalIp() string {
 
 	name, err := os.Hostname()
+
 	if err != nil {
 		elog.Errorf("get hostname fail: %v\n", err)
 		return "127.0.0.1"
@@ -53,7 +54,7 @@ func GetLocalIp() string {
 	}
 
 	for _, ip := range ipList {
-		if !strings.HasPrefix(ip, "127.") {
+		if !strings.HasPrefix(ip, "127.") && !strings.Contains(ip, "::") {
 			return ip
 		}
 	}
