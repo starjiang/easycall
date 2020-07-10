@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/starjiang/easycall-go"
+	"github.com/starjiang/easycall"
 )
 
 var count = 0

@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/starjiang/easycall-go"
+	"github.com/starjiang/easycall"
 )
 
 var requestCount = 0

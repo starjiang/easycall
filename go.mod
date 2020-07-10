@@ -1,4 +1,4 @@
-module github.com/starjiang/easycall-go
+module github.com/starjiang/easycall
 
 go 1.14
 
