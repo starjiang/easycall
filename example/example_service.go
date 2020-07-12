@@ -14,7 +14,7 @@ func (ps *ProfileService) GetProfile(req *easycall.Request, resp *easycall.Respo
 
 	user := &UserInfo{}
 	req.GetBody(user)
-	elog.Infof("head=%v,body=%v", req.GetHead(), user)
+	//elog.Infof("head=%v,body=%v", req.GetHead(), user)
 
 	respBody := make(map[string]interface{})
 	respBody["name"] = "jiangyouxing"
@@ -64,8 +64,8 @@ func main() {
 	defer elog.Flush()
 	context := easycall.NewServiceContext([]string{"127.0.0.1:2379"})
 	context.CreateService("profile", port, &ProfileService{}, 100)
-	context.CreateService("profile1", port+1, &ProfileService{}, 100)
-	context.AddMiddleware("profile", CheckLogin)
-	context.AddMiddleware("profile", CheckLogin2)
+	//context.CreateService("profile1", port+1, &ProfileService{}, 100)
+	//context.AddMiddleware("profile", CheckLogin)
+	//context.AddMiddleware("profile", CheckLogin2)
 	context.StartAndWait()
 }

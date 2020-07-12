@@ -38,9 +38,9 @@ func main() {
 		go func() {
 			for {
 				respBody := make(map[string]interface{})
-				err := easyClient.Request("GetProfile", nil, respBody, time.Second*1)
+				err := easyClient.Request("GetProfile", nil, &respBody, time.Second)
 				if err != nil {
-					fmt.Println(err)
+					fmt.Println("err=", err)
 				}
 				atomic.AddInt32(&pc, 1)
 
