@@ -26,7 +26,7 @@ package main
 import (
 	"flag"
 
-	"github.com/starjiang/easycall-go"
+	"github.com/starjiang/easycall"
 	"github.com/starjiang/elog"
 )
 
@@ -78,7 +78,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/starjiang/easycall-go"
+	"github.com/starjiang/easycall"
 	"github.com/starjiang/elog"
 )
 
