@@ -14,7 +14,7 @@ type ClientHandler struct {
 func NewClientHandler(client interface{}) *ClientHandler {
 	clientHandler := &ClientHandler{}
 	clientHandler.client = client
-	pool, _ := ants.NewPool(EASYCALL_CLIENT_GO_POOL_SIZE)
+	pool, _ := ants.NewPool(EASYCALL_CLIENT_GO_POOL_SIZE, ants.WithNonblocking(true))
 
 	clientHandler.pool = pool
 	return clientHandler
@@ -22,7 +22,8 @@ func NewClientHandler(client interface{}) *ClientHandler {
 
 func (h *ClientHandler) Dispatch(pkgData []byte, client *EasyConnection) {
 
-	h.pool.Submit(func() {
+	err := h.pool.Submit(func() {
+		defer PanicHandler()
 		serviceClient := h.client.(*ServiceClient)
 		reqPkg, err := DecodeWithBodyData(pkgData)
 		if err != nil {
@@ -30,4 +31,8 @@ func (h *ClientHandler) Dispatch(pkgData []byte, client *EasyConnection) {
 		}
 		serviceClient.Process(reqPkg)
 	})
+
+	if err != nil {
+		elog.Error("submit to pool fail,", err)
+	}
 }

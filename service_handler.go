@@ -21,7 +21,7 @@ func NewServiceHandler(service interface{}, middlewares []*MiddlewareInfo) *Serv
 	serviceHandler.service = service
 	serviceHandler.value = reflect.ValueOf(service)
 
-	pool, _ := ants.NewPool(EASYCALL_SERVICE_GO_POOL_SIZE)
+	pool, _ := ants.NewPool(EASYCALL_SERVICE_GO_POOL_SIZE, ants.WithNonblocking(true))
 
 	serviceHandler.pool = pool
 
@@ -44,7 +44,10 @@ func NewServiceHandler(service interface{}, middlewares []*MiddlewareInfo) *Serv
 
 func (h *ServiceHandler) Dispatch(pkgData []byte, client *EasyConnection) {
 
-	h.pool.Submit(func() {
+	err := h.pool.Submit(func() {
+
+		defer PanicHandler()
+
 		reqPkg, err := DecodeWithBodyData(pkgData)
 
 		if err != nil {
@@ -58,6 +61,10 @@ func (h *ServiceHandler) Dispatch(pkgData []byte, client *EasyConnection) {
 		h.middlewares[0].Middleware(req, resp, client, h.middlewares[0].Next)
 
 	})
+
+	if err != nil {
+		elog.Error("submit to pool fail,", err)
+	}
 }
 
 func (h *ServiceHandler) onRequest(req *Request, resp *Response, client *EasyConnection) {
