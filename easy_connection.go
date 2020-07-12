@@ -136,7 +136,7 @@ func (ec *EasyConnection) Read() {
 			elog.Error("invalid pkg etx", pkgData[pkgLen-1])
 			return
 		}
-		go ec.handler.Dispatch(pkgData, ec)
+		ec.handler.Dispatch(pkgData, ec)
 	}
 }
 

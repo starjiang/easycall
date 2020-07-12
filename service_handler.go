@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/panjf2000/ants/v2"
 	"github.com/starjiang/elog"
 )
 
@@ -12,12 +13,18 @@ type ServiceHandler struct {
 	service     interface{}
 	value       reflect.Value
 	middlewares []*MiddlewareInfo
+	pool        *ants.Pool
 }
 
 func NewServiceHandler(service interface{}, middlewares []*MiddlewareInfo) *ServiceHandler {
 	serviceHandler := &ServiceHandler{}
 	serviceHandler.service = service
 	serviceHandler.value = reflect.ValueOf(service)
+
+	pool, _ := ants.NewPool(EASYCALL_SERVICE_GO_POOL_SIZE)
+
+	serviceHandler.pool = pool
+
 	mlen := len(middlewares)
 
 	finalFunc := func(req *Request, resp *Response, client *EasyConnection, next *MiddlewareInfo) {
@@ -37,17 +44,20 @@ func NewServiceHandler(service interface{}, middlewares []*MiddlewareInfo) *Serv
 
 func (h *ServiceHandler) Dispatch(pkgData []byte, client *EasyConnection) {
 
-	reqPkg, err := DecodeWithBodyData(pkgData)
+	h.pool.Submit(func() {
+		reqPkg, err := DecodeWithBodyData(pkgData)
 
-	if err != nil {
-		elog.Error("decode pkg fail:", err)
-		return
-	}
+		if err != nil {
+			elog.Error("decode pkg fail:", err)
+			return
+		}
 
-	req := &Request{reqPkg.GetFormat(), reqPkg.GetHead(), reqPkg.GetBodyData(), time.Now(), client.conn.RemoteAddr().String()}
-	resp := &Response{reqPkg.GetFormat(), nil, nil}
+		req := &Request{reqPkg.GetFormat(), reqPkg.GetHead(), reqPkg.GetBodyData(), time.Now(), client.conn.RemoteAddr().String()}
+		resp := &Response{reqPkg.GetFormat(), nil, nil}
 
-	h.middlewares[0].Middleware(req, resp, client, h.middlewares[0].Next)
+		h.middlewares[0].Middleware(req, resp, client, h.middlewares[0].Next)
+
+	})
 }
 
 func (h *ServiceHandler) onRequest(req *Request, resp *Response, client *EasyConnection) {
