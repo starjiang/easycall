@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"time"
 
 	"github.com/starjiang/easycall"
 	"github.com/starjiang/elog"
@@ -20,6 +19,10 @@ func (ps *ProfileService) GetProfile(req *easycall.Request, resp *easycall.Respo
 	respBody := make(map[string]interface{})
 	respBody["name"] = "jiangyouxing"
 	respBody["email"] = "starjiang@gmail.com"
+
+	// index := rand.Intn(10)
+
+	// time.Sleep(time.Millisecond * time.Duration(index))
 
 	resp.SetHead(req.GetHead()).SetBody(respBody)
 }
@@ -61,6 +64,7 @@ func init() {
 }
 
 type ApmReport struct {
+	service string
 }
 
 func (ar *ApmReport) OnData(data map[string]*easycall.ApmMonitorStatus) {
@@ -75,6 +79,6 @@ func main() {
 	//context.CreateService("profile1", port+1, &ProfileService{}, 100)
 	//context.AddMiddleware("profile", CheckLogin)
 	//context.AddMiddleware("profile", CheckLogin2)
-	context.AddMiddleware("profile", easycall.NewApmMontor(&ApmReport{}, 10*time.Second).Process)
+	context.AddMiddleware("profile", easycall.NewApmMontor(&ApmReport{"profile"}).Middleware)
 	context.StartAndWait()
 }

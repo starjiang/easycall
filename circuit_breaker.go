@@ -54,23 +54,22 @@ func CbConfigure(cbName string, failRate float32, limitRate float32, countBase i
 		lock = &sync.Mutex{}
 		cbMutexes[cbName] = lock
 	}
-	cbMutex.Unlock()
-
-	lock.Lock()
 
 	info := cbInfos[cbName]
 	if info == nil {
 		info = &CbInfo{1, 0, 0, 0, timeNow, CB_STATUS_CLOSE, failRate, limitRate, countBase, failTime, limitTime, resetTime}
 		cbInfos[cbName] = info
-	} else {
-		info.failRate = failRate
-		info.limitRate = limitRate
-		info.countBase = countBase
-		info.failTime = failTime
-		info.limitTime = limitTime
-		info.resetTime = resetTime
 	}
 
+	cbMutex.Unlock()
+
+	lock.Lock()
+	info.failRate = failRate
+	info.limitRate = limitRate
+	info.countBase = countBase
+	info.failTime = failTime
+	info.limitTime = limitTime
+	info.resetTime = resetTime
 	lock.Unlock()
 
 }
@@ -86,15 +85,16 @@ func CbCall(cbName string, run runFunc, fail failFunc) error {
 		lock = &sync.Mutex{}
 		cbMutexes[cbName] = lock
 	}
-	cbMutex.Unlock()
-
-	lock.Lock()
 
 	info := cbInfos[cbName]
 	if info == nil {
 		info = &CbInfo{1, 0, 0, 0, timeNow, CB_STATUS_CLOSE, CB_FAIL_RATE, CB_LIMIT_RATE, CB_COUNT_BASE, CB_FAIL_TIME, CB_LIMIT_TIME, CB_RESET_TIME}
 		cbInfos[cbName] = info
 	}
+
+	cbMutex.Unlock()
+
+	lock.Lock()
 
 	//熔断过期后，把熔断器状态设置为半开状
 	if info.status == CB_STATUS_OPEN && info.lastCircuitBreakerTime+info.failTime < timeNow {

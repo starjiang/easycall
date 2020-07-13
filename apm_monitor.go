@@ -6,14 +6,16 @@ import (
 	"time"
 )
 
+const APM_COUNT_INTERVAL = 60
+
 type ApmMonitorHandler interface {
 	OnData(data map[string]*ApmMonitorStatus)
 }
 
-func NewApmMontor(handler ApmMonitorHandler, interval time.Duration) *ApmMonitor {
+func NewApmMontor(handler ApmMonitorHandler) *ApmMonitor {
 	apmMonitor := &ApmMonitor{}
 	apmMonitor.handler = handler
-	apmMonitor.interval = interval
+	apmMonitor.interval = APM_COUNT_INTERVAL * time.Second
 	apmMonitor.mutex = &sync.Mutex{}
 	apmMonitor.statuses = make(map[string]*ApmMonitorStatus)
 	go apmMonitor.reportAndReset()
@@ -33,7 +35,7 @@ type ApmMonitor struct {
 	mutex    *sync.Mutex
 }
 
-func (am *ApmMonitor) Process(req *Request, resp *Response, client *EasyConnection, next *MiddlewareInfo) {
+func (am *ApmMonitor) Middleware(req *Request, resp *Response, client *EasyConnection, next *MiddlewareInfo) {
 	am.mutex.Lock()
 	status := am.statuses[req.GetHead().GetMethod()]
 	if status == nil {
@@ -49,8 +51,7 @@ func (am *ApmMonitor) Process(req *Request, resp *Response, client *EasyConnecti
 	end := time.Now()
 
 	spendTime := end.Sub(start)
-
-	atomic.AddUint64(&status.Time, uint64(spendTime))
+	atomic.AddUint64(&status.Time, uint64(spendTime.Milliseconds()))
 
 	head := resp.GetHead()
 	if head != nil {
@@ -70,9 +71,9 @@ func (am *ApmMonitor) reportAndReset() {
 		am.mutex.Unlock()
 
 		for _, v := range statuses {
-			v.Total = v.Total / uint64(am.interval/time.Second)
-			v.Time = v.Time / uint64(am.interval/time.Second)
-			v.Error = v.Error / uint64(am.interval/time.Second)
+			if v.Total > 0 {
+				v.Time = v.Time / v.Total
+			}
 		}
 		am.handler.OnData(statuses)
 	}
