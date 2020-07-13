@@ -87,7 +87,8 @@ func main() {
 	flag.Parse()
 	defer elog.Flush()
 
-	easyClient := easycall.NewServiceClient([]string{"127.0.0.1:2379"}, "profile", 100, easycall.LB_ACTIVE)//创建微服务调用客户端，参数为etcd endpoints,要调用的微服务名,100 是连接池大小,负载均衡 是easycall.LB_ACTIVE（动态请求负载均衡） 
+	easyClient := easycall.NewServiceClient([]string{"127.0.0.1:2379"}, "profile", 100, easycall.LB_ACTIVE)
+	//创建微服务调用客户端，参数为etcd endpoints,要调用的微服务名,100 是连接池大小,负载均衡 是easycall.LB_ACTIVE（动态请求负载均衡） 
 
 	reqBody := make(map[string]interface{}) //请求body
 	respBody := make(map[string]interface{}) //返回body
