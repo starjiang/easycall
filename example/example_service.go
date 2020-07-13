@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"time"
 
 	"github.com/starjiang/easycall"
 	"github.com/starjiang/elog"
@@ -59,6 +60,13 @@ func init() {
 	flag.IntVar(&port, "port", 8001, "listen port")
 }
 
+type ApmReport struct {
+}
+
+func (ar *ApmReport) OnData(data map[string]*easycall.ApmMonitorStatus) {
+	elog.Error(data["GetProfile"])
+}
+
 func main() {
 	flag.Parse()
 	defer elog.Flush()
@@ -67,5 +75,6 @@ func main() {
 	//context.CreateService("profile1", port+1, &ProfileService{}, 100)
 	//context.AddMiddleware("profile", CheckLogin)
 	//context.AddMiddleware("profile", CheckLogin2)
+	context.AddMiddleware("profile", easycall.NewApmMontor(&ApmReport{}, 10*time.Second).Process)
 	context.StartAndWait()
 }
