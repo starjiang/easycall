@@ -4,6 +4,7 @@ import (
 	"errors"
 	"hash/crc32"
 	"math/rand"
+	"time"
 )
 
 const (
@@ -73,6 +74,7 @@ func (lb *LoadBalancer) getNodeByLoadBalanceActive() *Node {
 func (lb *LoadBalancer) getNodeByLoadBalanceRandom() *Node {
 
 	len := len(lb.nodeList)
+	rand.Seed(time.Now().UnixNano())
 	index := rand.Intn(len)
 	return lb.nodeList[index]
 }
@@ -100,6 +102,7 @@ func (lb *LoadBalancer) getNodeByLoadBalanceRandomWeight() *Node {
 		node := lb.nodeList[i]
 		total += node.Weight
 	}
+	rand.Seed(time.Now().UnixNano())
 	random := rand.Intn(total)
 	for i := 0; i < len(lb.nodeList); i++ {
 		node := lb.nodeList[i]
