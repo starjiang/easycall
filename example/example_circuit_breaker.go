@@ -11,7 +11,7 @@ import (
 
 var count = 0
 
-func getUserName() error {
+func call() error {
 	if count > 15 {
 		fmt.Println("NO ERROR")
 		return nil
@@ -29,7 +29,7 @@ func fail() error {
 func main() {
 	flag.Parse()
 	for i := 0; i < 200; i++ {
-		err := easycall.CbCall("hello", getUserName, fail)
+		err := easycall.CbCall("hello", call, fail)
 		if err != nil {
 			fmt.Println(err)
 		}

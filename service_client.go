@@ -28,6 +28,12 @@ type ServiceClient struct {
 	lb              *LoadBalancer
 }
 
+//create a new service request client
+
+//endpoints etcd endpoints list
+//serviceName microservice name
+//poolsize connection pool size
+//loadBalanceType for 5 kinds of loadbalance
 func NewServiceClient(endpoints []string, serviceName string, poolSize int, loadBalanceType int) *ServiceClient {
 
 	ServiceClient := &ServiceClient{}
@@ -45,6 +51,12 @@ func NewServiceClient(endpoints []string, serviceName string, poolSize int, load
 	return ServiceClient
 }
 
+//request with head
+
+//format serialize format type json/msgpack
+//head request head
+//body request body
+//timeout request timeout
 func (ec *ServiceClient) RequestByHead(format byte, head *EasyHead, body interface{}, timeout time.Duration) (*EasyPackage, error) {
 
 	ch, err := ec.RequestAsyncByHead(format, head, body, timeout)
@@ -81,6 +93,12 @@ func (ec *ServiceClient) RequestAsync(method string, body interface{}, timeout t
 	return ec.RequestAsyncByHead(FORMAT_MSGPACK, NewEasyHead().SetService(ec.serviceName).SetMethod(method), body, timeout)
 }
 
+//request with head through by Async
+
+//format serialize format type json/msgpack
+//head request head
+//body request body
+//timeout request timeout
 func (ec *ServiceClient) RequestAsyncByHead(format byte, head *EasyHead, body interface{}, timeout time.Duration) (chan *EasyPackage, error) {
 
 	if head.GetService() != ec.serviceName {

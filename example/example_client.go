@@ -21,6 +21,7 @@ func main() {
 			respBody := make(map[string]interface{})
 			err := easyClient.Request("GetProfile", reqBody, &respBody, time.Second)
 			if err != nil {
+
 				fmt.Println(err)
 				return
 			}

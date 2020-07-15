@@ -27,14 +27,14 @@ func (ps *ProfileService) GetProfile(req *easycall.Request, resp *easycall.Respo
 	resp.SetHead(req.GetHead()).SetBody(respBody)
 }
 
-func CheckLogin(req *easycall.Request, resp *easycall.Response, client *easycall.EasyConnection, next *easycall.MiddlewareInfo) {
+func Middleware1(req *easycall.Request, resp *easycall.Response, client *easycall.EasyConnection, next *easycall.MiddlewareInfo) {
 	user := &UserInfo{}
 	req.GetBody(user)
 	elog.Infof("head1=%v,body1=%v", req.GetHead(), user)
 	next.Middleware(req, resp, client, next.Next)
 }
 
-func CheckLogin2(req *easycall.Request, resp *easycall.Response, client *easycall.EasyConnection, next *easycall.MiddlewareInfo) {
+func Middleware2(req *easycall.Request, resp *easycall.Response, client *easycall.EasyConnection, next *easycall.MiddlewareInfo) {
 	user := &UserInfo{}
 	req.GetBody(user)
 	elog.Infof("head2=%v,body2=%v", req.GetHead(), user)
@@ -77,8 +77,8 @@ func main() {
 	context := easycall.NewServiceContext([]string{"127.0.0.1:2379"})
 	context.CreateService("profile", port, &ProfileService{}, 100)
 	//context.CreateService("profile1", port+1, &ProfileService{}, 100)
-	//context.AddMiddleware("profile", CheckLogin)
-	//context.AddMiddleware("profile", CheckLogin2)
+	//context.AddMiddleware("profile", Middleware1)
+	//context.AddMiddleware("profile", Middleware2)
 	context.AddMiddleware("profile", easycall.NewApmMontor(&ApmReport{"profile"}).Middleware)
 	context.StartAndWait()
 }
