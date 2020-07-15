@@ -17,7 +17,7 @@ const (
 
 type LoadBalancer struct {
 	nodeList []*Node
-	seq      int
+	seq      int64
 }
 
 func NewLoadBalancer() *LoadBalancer {
