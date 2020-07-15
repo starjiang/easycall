@@ -10,14 +10,12 @@ import (
 )
 
 const (
-	STX                    = 0x2
-	ETX                    = 0x3
-	HEAD_MAX_LEN           = 128 * 2014
-	BODY_MAX_LEN           = 2 * 1024 * 1024
-	FORMAT_JSON            = 1
-	FORMAT_MSGPACK         = 0
-	ERROR_METHOD_NOT_FOUND = 1002
-	ERROR_INTERNEL_ERROR   = 1001
+	STX            = 0x2
+	ETX            = 0x3
+	HEAD_MAX_LEN   = 128 * 2014
+	BODY_MAX_LEN   = 2 * 1024 * 1024
+	FORMAT_JSON    = 1
+	FORMAT_MSGPACK = 0
 )
 
 //EasyHead for EasyPackage

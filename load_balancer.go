@@ -117,6 +117,6 @@ func (lb *LoadBalancer) getNodeByLoadBalanceRandomWeight() *Node {
 func (lb *LoadBalancer) getNodeByLoadBalanceRoundRobin() *Node {
 	lb.seq++
 	len := len(lb.nodeList)
-	index := lb.seq % len
+	index := int(lb.seq % int64(len))
 	return lb.nodeList[index]
 }

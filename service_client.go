@@ -68,10 +68,10 @@ func (ec *ServiceClient) Request(method string, reqBody interface{}, respBody in
 	}
 	respPkg := <-ch
 	if respPkg == nil {
-		return errors.New("request time out")
+		return NewSystemError(ERROR_TIME_OUT, "request time out")
 	}
 	if respPkg.GetHead().GetRet() != 0 {
-		return errors.New(respPkg.GetHead().GetMsg() + ",ret=" + strconv.Itoa(respPkg.GetHead().GetRet()))
+		return NewLogicError(respPkg.GetHead().GetRet(), respPkg.GetHead().GetMsg())
 	}
 	return respPkg.DecodeBody(respBody)
 
@@ -84,11 +84,11 @@ func (ec *ServiceClient) RequestAsync(method string, body interface{}, timeout t
 func (ec *ServiceClient) RequestAsyncByHead(format byte, head *EasyHead, body interface{}, timeout time.Duration) (chan *EasyPackage, error) {
 
 	if head.GetService() != ec.serviceName {
-		return nil, errors.New("service name is different from init")
+		return nil, NewSystemError(ERROR_INTERNAL_ERROR, "service name is different from init")
 	}
 
 	if ec.nodeMgr == nil {
-		return nil, errors.New("nodemgr is nil,maybe etcd connect fail")
+		return nil, NewSystemError(ERROR_INTERNAL_ERROR, "nodemgr is nil,maybe etcd connect fail")
 	}
 	lbType := ec.loadBalanceType
 
@@ -99,13 +99,13 @@ func (ec *ServiceClient) RequestAsyncByHead(format byte, head *EasyHead, body in
 	nodeList, err := ec.nodeMgr.getNodes()
 
 	if err != nil {
-		return nil, err
+		return nil, NewSystemError(ERROR_SERVICE_NOT_FOUND, err.Error())
 	}
 
 	ec.lb.SetNodes(nodeList)
 	node, err := ec.lb.GetNode(lbType, head.GetRouteKey())
 	if err != nil {
-		return nil, err
+		return nil, NewSystemError(ERROR_INTERNAL_ERROR, err.Error())
 	}
 	key := node.Ip + ":" + strconv.Itoa(node.Port)
 
@@ -129,7 +129,7 @@ func (ec *ServiceClient) RequestAsyncByHead(format byte, head *EasyHead, body in
 
 	conn, err := pool.Acquire()
 	if err != nil {
-		return nil, err
+		return nil, NewSystemError(ERROR_INTERNAL_ERROR, err.Error())
 	}
 	pool.Release(conn)
 
@@ -142,7 +142,7 @@ func (ec *ServiceClient) RequestAsyncByHead(format byte, head *EasyHead, body in
 
 	if err != nil {
 		ec.sessionMgr.DestorySessionAndRespPkg(session, nil)
-		return nil, err
+		return nil, NewSystemError(ERROR_INTERNAL_ERROR, err.Error())
 	}
 
 	easyConn.Send(pkgData)

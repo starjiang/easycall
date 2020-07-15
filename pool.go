@@ -5,6 +5,8 @@ import (
 	"io"
 	"sync/atomic"
 	"time"
+
+	"github.com/starjiang/elog"
 )
 
 type Poolable interface {
@@ -48,6 +50,7 @@ func NewGenericPool(minSize int32, maxSize int32, lifetime time.Duration, connFa
 	for i := 0; i < int(minSize); i++ {
 		conn, err := connFactory()
 		if err != nil {
+			elog.Error(err)
 			continue
 		}
 		atomic.AddInt32(&pool.curSize, 1)
