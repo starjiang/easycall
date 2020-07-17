@@ -7,3 +7,4 @@ example_service
 example_client
 example_circuit_breaker
 example_config
+gateway

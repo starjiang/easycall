@@ -24,7 +24,7 @@ func (ps *ProfileService) GetProfile(req *easycall.Request, resp *easycall.Respo
 
 	// time.Sleep(time.Millisecond * time.Duration(index))
 
-	resp.SetHead(req.GetHead()).SetBody(respBody)
+	resp.SetBody(respBody)
 }
 
 func Middleware1(req *easycall.Request, resp *easycall.Response, client *easycall.EasyConnection, next *easycall.MiddlewareInfo) {

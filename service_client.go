@@ -1,7 +1,6 @@
 package easycall
 
 import (
-	"errors"
 	"strconv"
 	"sync"
 	"time"
@@ -57,23 +56,23 @@ func NewServiceClient(endpoints []string, serviceName string, poolSize int, load
 //head request head
 //body request body
 //timeout request timeout
-func (ec *ServiceClient) RequestByHead(format byte, head *EasyHead, body interface{}, timeout time.Duration) (*EasyPackage, error) {
+func (ec *ServiceClient) RequestWithHead(format byte, head *EasyHead, body interface{}, timeout time.Duration) (*EasyPackage, error) {
 
-	ch, err := ec.RequestAsyncByHead(format, head, body, timeout)
+	ch, err := ec.RequestAsyncWithHead(format, head, body, timeout)
 
 	if err != nil {
 		return nil, err
 	}
 	respPkg := <-ch
 	if respPkg == nil {
-		return nil, errors.New("request time out")
+		return nil, NewSystemError(ERROR_TIME_OUT, "request time out")
 	}
 	return respPkg, nil
 }
 
 func (ec *ServiceClient) Request(method string, reqBody interface{}, respBody interface{}, timeout time.Duration) error {
 
-	ch, err := ec.RequestAsyncByHead(FORMAT_MSGPACK, NewEasyHead().SetService(ec.serviceName).SetMethod(method), reqBody, timeout)
+	ch, err := ec.RequestAsyncWithHead(FORMAT_MSGPACK, NewEasyHead().SetService(ec.serviceName).SetMethod(method), reqBody, timeout)
 
 	if err != nil {
 		return err
@@ -90,7 +89,7 @@ func (ec *ServiceClient) Request(method string, reqBody interface{}, respBody in
 }
 
 func (ec *ServiceClient) RequestAsync(method string, body interface{}, timeout time.Duration) (chan *EasyPackage, error) {
-	return ec.RequestAsyncByHead(FORMAT_MSGPACK, NewEasyHead().SetService(ec.serviceName).SetMethod(method), body, timeout)
+	return ec.RequestAsyncWithHead(FORMAT_MSGPACK, NewEasyHead().SetService(ec.serviceName).SetMethod(method), body, timeout)
 }
 
 //request with head through by Async
@@ -99,7 +98,7 @@ func (ec *ServiceClient) RequestAsync(method string, body interface{}, timeout t
 //head request head
 //body request body
 //timeout request timeout
-func (ec *ServiceClient) RequestAsyncByHead(format byte, head *EasyHead, body interface{}, timeout time.Duration) (chan *EasyPackage, error) {
+func (ec *ServiceClient) RequestAsyncWithHead(format byte, head *EasyHead, body interface{}, timeout time.Duration) (chan *EasyPackage, error) {
 
 	if head.GetService() != ec.serviceName {
 		return nil, NewSystemError(ERROR_INTERNAL_ERROR, "service name is different from init")
@@ -156,14 +155,25 @@ func (ec *ServiceClient) RequestAsyncByHead(format byte, head *EasyHead, body in
 	session := ec.sessionMgr.InitSession(timeout, node)
 	head.SetSeq(session.seq)
 
-	pkgData, err := NewPackageWithBody(format, head, body).EncodeWithBody()
+	bodyData, ok := body.([]byte)
+	if ok {
 
-	if err != nil {
-		ec.sessionMgr.DestorySessionAndRespPkg(session, nil)
-		return nil, NewSystemError(ERROR_INTERNAL_ERROR, err.Error())
+		pkgData, err := NewPackageWithBodyData(format, head, bodyData).EncodeWithBodyData()
+		if err != nil {
+			ec.sessionMgr.DestorySessionAndRespPkg(session, nil)
+			return nil, NewSystemError(ERROR_INTERNAL_ERROR, err.Error())
+		}
+		easyConn.Send(pkgData)
+
+	} else {
+		pkgData, err := NewPackageWithBody(format, head, body).EncodeWithBody()
+
+		if err != nil {
+			ec.sessionMgr.DestorySessionAndRespPkg(session, nil)
+			return nil, NewSystemError(ERROR_INTERNAL_ERROR, err.Error())
+		}
+		easyConn.Send(pkgData)
 	}
-
-	easyConn.Send(pkgData)
 
 	go func() {
 		<-session.timer.C

@@ -109,7 +109,8 @@ func (svc *ServiceContext) StartAndWait() error {
 				return
 			}
 			elog.Infof("service %s start at port %d", info.name, info.port)
-			err = server.CreateServer(info.port, info.service, svc.middlewares[info.name])
+			handler := NewServiceHandler(info.service, svc.middlewares[info.name])
+			err = server.CreateServer(info.port, handler)
 			if err != nil {
 				elog.Error("start service fail:", err, info.name, info.port, info.weight)
 				register.Unregister(info.name, info.port)

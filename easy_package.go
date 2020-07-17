@@ -23,7 +23,7 @@ type EasyHead struct {
 	Service   string `json:"service"`
 	Method    string `json:"method"`
 	RouteKey  string `json:"routeKey"`
-	Sig       string `json:"sig"`
+	Token     string `json:"token"`
 	Uid       uint64 `json:"uid"`
 	RequestIp string `json:"requestIp"`
 	TraceId   string `json:"traceId"`
@@ -46,8 +46,8 @@ func (head *EasyHead) GetMethod() string {
 func (head *EasyHead) GetRouteKey() string {
 	return head.RouteKey
 }
-func (head *EasyHead) GetSig() string {
-	return head.Sig
+func (head *EasyHead) GetToken() string {
+	return head.Token
 }
 func (head *EasyHead) GetUid() uint64 {
 	return head.Uid
@@ -85,8 +85,8 @@ func (head *EasyHead) SetRouteKey(routeKey string) *EasyHead {
 	return head
 }
 
-func (head *EasyHead) SetSig(sig string) *EasyHead {
-	head.Sig = sig
+func (head *EasyHead) SetToken(token string) *EasyHead {
+	head.Token = token
 	return head
 }
 
@@ -125,15 +125,16 @@ type EasyPackage struct {
 	format   byte
 	head     *EasyHead
 	bodyData []byte
+	pkgData  []byte
 	body     interface{}
 }
 
 func NewPackageWithBodyData(format byte, head *EasyHead, bodyData []byte) *EasyPackage {
-	return &EasyPackage{format, head, bodyData, nil}
+	return &EasyPackage{format, head, bodyData, nil, nil}
 }
 
 func NewPackageWithBody(format byte, head *EasyHead, body interface{}) *EasyPackage {
-	return &EasyPackage{format, head, nil, body}
+	return &EasyPackage{format, head, nil, nil, body}
 }
 
 func DecodeWithBodyData(pkgData []byte) (*EasyPackage, error) {
@@ -152,7 +153,7 @@ func DecodeWithBodyData(pkgData []byte) (*EasyPackage, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewPackageWithBodyData(format, head, bodyData), nil
+		return &EasyPackage{format, head, bodyData, pkgData, nil}, nil
 
 	} else if format == FORMAT_MSGPACK {
 		head := &EasyHead{}
@@ -160,7 +161,7 @@ func DecodeWithBodyData(pkgData []byte) (*EasyPackage, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewPackageWithBodyData(format, head, bodyData), nil
+		return &EasyPackage{format, head, bodyData, pkgData, nil}, nil
 	} else {
 		return nil, errors.New("invalid pkg format")
 	}
@@ -187,6 +188,8 @@ func DecodeWithBody(pkgData []byte) (*EasyPackage, error) {
 		if err != nil {
 			return nil, err
 		}
+		return &EasyPackage{format, head, nil, pkgData, (interface{})(body)}, nil
+
 		return NewPackageWithBody(format, head, (interface{})(body)), nil
 	} else if format == FORMAT_MSGPACK {
 		head := &EasyHead{}
@@ -200,7 +203,7 @@ func DecodeWithBody(pkgData []byte) (*EasyPackage, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewPackageWithBody(format, head, (interface{})(body)), nil
+		return &EasyPackage{format, head, nil, pkgData, (interface{})(body)}, nil
 	} else {
 		return nil, errors.New("invalid pkg format")
 	}
@@ -328,6 +331,15 @@ func (pkg *EasyPackage) GetBodyData() []byte {
 
 func (pkg *EasyPackage) SetBodyData(bodyData []byte) *EasyPackage {
 	pkg.bodyData = bodyData
+	return pkg
+}
+
+func (pkg *EasyPackage) GetPkgData() []byte {
+	return pkg.pkgData
+}
+
+func (pkg *EasyPackage) SetPkgData(pkgData []byte) *EasyPackage {
+	pkg.pkgData = pkgData
 	return pkg
 }
 

@@ -17,9 +17,8 @@ const (
 type Server struct {
 }
 
-func (serv *Server) CreateServer(port int, service interface{}, middlewares []*MiddlewareInfo) error {
+func (serv *Server) CreateServer(port int, handler PkgHandler) error {
 
-	handler := NewServiceHandler(service, middlewares)
 	listen, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
 		elog.Error("listen error: ", err)

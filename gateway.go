@@ -1,20 +1,16 @@
 package easycall
 
+import "net/http"
+
 type Gateway struct {
 }
 
-func NewGateway(endpoints []string) (*Gateway, error) {
-	return nil, nil
+func (gw *Gateway) StartGWServer(port int, handler *GatewayHandler) error {
+	server := &Server{}
+	return server.CreateServer(port, handler)
 }
 
-func (gw *Gateway) CreateServer(port int) {
-
-}
-
-func (gw *Gateway) CreateHttpServer(port int) {
-
-}
-
-func (gw *Gateway) AddMiddleware() {
-
+func (gw *Gateway) StartHttpGWServer(port int, handler http.Handler) error {
+	httpServer := &HttpServer{}
+	return httpServer.CreateHttpServer(port, handler)
 }
