@@ -25,18 +25,22 @@ func (serv *Server) CreateServer(port int, handler PkgHandler) error {
 		return err
 	}
 
-	for {
-		conn, err := listen.Accept()
-		if err != nil {
-			elog.Error("accept error: ", err)
-			continue
+	go func() {
+		for {
+			conn, err := listen.Accept()
+			if err != nil {
+				elog.Error("accept error: ", err)
+				continue
+			}
+			tcpConn := conn.(*net.TCPConn)
+			tcpConn.SetKeepAlive(true)
+			tcpConn.SetKeepAlivePeriod(time.Minute * TCP_KEEPALIVE_PERIOD)
+			tcpConn.SetNoDelay(true)
+			client := &EasyConnection{conn: tcpConn, writeChan: make(chan []byte, EASYCALL_WRITE_QUEUE_SIZE), handler: handler, mutex: &sync.Mutex{}, activeTime: time.Now()}
+			go client.Read()
+			go client.Write()
 		}
-		tcpConn := conn.(*net.TCPConn)
-		tcpConn.SetKeepAlive(true)
-		tcpConn.SetKeepAlivePeriod(time.Minute * TCP_KEEPALIVE_PERIOD)
-		tcpConn.SetNoDelay(true)
-		client := &EasyConnection{conn: tcpConn, writeChan: make(chan []byte, EASYCALL_WRITE_QUEUE_SIZE), handler: handler, mutex: &sync.Mutex{}, activeTime: time.Now()}
-		go client.Read()
-		go client.Write()
-	}
+	}()
+
+	return nil
 }

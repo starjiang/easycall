@@ -69,7 +69,6 @@ func (h *ServiceHandler) Dispatch(pkgData []byte, client *EasyConnection) {
 
 func (h *ServiceHandler) onRequest(req *Request, resp *Response, client *EasyConnection) {
 
-	defer PanicHandler()
 	m := h.value.MethodByName(req.head.Method)
 
 	if !m.IsValid() {

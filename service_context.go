@@ -96,10 +96,18 @@ func (svc *ServiceContext) StartAndWait() error {
 	for _, info := range svc.serviceList {
 		server := &Server{}
 		go func(info *ServiceInfo, wg *sync.WaitGroup) {
+			elog.Infof("service %s start at port %d", info.name, info.port)
+			handler := NewServiceHandler(info.service, svc.middlewares[info.name])
+			err := server.CreateServer(info.port, handler)
+			if err != nil {
+				elog.Error("start service fail:", err, info.name, info.port, info.weight)
+				wg.Done()
+				return
+			}
 			register, err := NewServiceRegister(svc.endpoints, time.Second*ETCD_CONNECT_TIMEOUT)
 			if err != nil {
 				wg.Done()
-				elog.Error("register fail:", err, info.name, info.port, info.weight)
+				elog.Error("init register fail:", err, info.name, info.port, info.weight)
 				return
 			}
 			err = register.Register(info.name, info.port, info.weight)
@@ -108,14 +116,7 @@ func (svc *ServiceContext) StartAndWait() error {
 				elog.Error("register fail:", err, info.name, info.port, info.weight)
 				return
 			}
-			elog.Infof("service %s start at port %d", info.name, info.port)
-			handler := NewServiceHandler(info.service, svc.middlewares[info.name])
-			err = server.CreateServer(info.port, handler)
-			if err != nil {
-				elog.Error("start service fail:", err, info.name, info.port, info.weight)
-				register.Unregister(info.name, info.port)
-				wg.Done()
-			}
+
 		}(info, &wg)
 	}
 

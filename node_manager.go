@@ -22,6 +22,7 @@ type NodeManager struct {
 	serviceName string
 	nodeList    []*Node
 	timeout     time.Duration
+	watched     bool
 }
 
 type Node struct {
@@ -83,15 +84,21 @@ func (nm *NodeManager) loadServiceNode(path string) error {
 		return err
 	}
 
-	//children changed reload
-	go func() {
-		//watch
-		rch := nm.cli.Watch(context.Background(), path, clientv3.WithPrefix())
-		for _ = range rch {
-			nm.loadServiceNode(path)
-		}
-		elog.Info("node watch failed")
-	}()
+	if nm.watched == false {
+		nm.watched = true
+		//children changed reload
+		go func() {
+			for {
+				//watch
+				rch := nm.cli.Watch(context.Background(), path, clientv3.WithPrefix())
+				for _ = range rch {
+					elog.Info(path, "node reload")
+					nm.loadServiceNode(path)
+				}
+				elog.Error(path, "watch failed")
+			}
+		}()
+	}
 
 	nodeList := make([]*Node, 0)
 
