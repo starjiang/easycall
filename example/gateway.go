@@ -30,8 +30,16 @@ func init() {
 
 func ProxyMiddleware(reqPkg *easycall.EasyPackage, client *easycall.EasyConnection, next *easycall.GWMiddlewareInfo) {
 	respPkg, err := easyClient.RequestWithHead(reqPkg.GetFormat(), reqPkg.GetHead(), reqPkg.GetBodyData(), time.Duration(timeout)*time.Second)
+
 	if err != nil {
-		respData, err := easycall.NewPackageWithBody(reqPkg.GetFormat(), reqPkg.GetHead().SetRet(easycall.ERROR_INTERNAL_ERROR).SetMethod(err.Error()), nil).EncodeWithBody()
+		respPkg = easycall.NewPackageWithBody(reqPkg.GetFormat(), reqPkg.GetHead(), nil)
+		systemError, ok := err.(*easycall.SystemError)
+		if ok {
+			respPkg.GetHead().SetRet(systemError.GetRet()).SetMsg(systemError.GetMsg())
+		} else {
+			respPkg.GetHead().SetRet(easycall.ERROR_INTERNAL_ERROR).SetMsg(err.Error())
+		}
+		respData, err := respPkg.EncodeWithBody()
 		if err != nil {
 			elog.Error(err)
 			return
@@ -100,16 +108,18 @@ func HttpProxyMiddleware(w http.ResponseWriter, r *http.Request, next *easycall.
 		return
 	}
 
-	if respPkg.GetHead().GetRet() < easycall.ERROR_MAX_SYSTEM_CODE {
-		w.Header().Set("X-Easycall-Ret", strconv.Itoa(respPkg.GetHead().GetRet()))
-		http.Error(w, respPkg.GetHead().GetMsg(), http.StatusInternalServerError)
-		return
-	} else {
-		w.Header().Set("X-Easycall-Ret", strconv.Itoa(respPkg.GetHead().GetRet()))
-		http.Error(w, respPkg.GetHead().GetMsg(), http.StatusBadRequest)
-		return
+	if respPkg.GetHead().GetRet() != 0 {
+		if respPkg.GetHead().GetRet() < easycall.ERROR_MAX_SYSTEM_CODE {
+			w.Header().Set("X-Easycall-Ret", strconv.Itoa(respPkg.GetHead().GetRet()))
+			http.Error(w, respPkg.GetHead().GetMsg(), http.StatusInternalServerError)
+			return
+		} else {
+			w.Header().Set("X-Easycall-Ret", strconv.Itoa(respPkg.GetHead().GetRet()))
+			http.Error(w, respPkg.GetHead().GetMsg(), http.StatusBadRequest)
+			return
+		}
 	}
-
+	w.Header().Set("Content-Type", "application/json;charset=utf-8")
 	w.Write(respPkg.GetBodyData())
 
 	if next != nil {

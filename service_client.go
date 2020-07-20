@@ -81,11 +81,15 @@ func (ec *ServiceClient) Request(method string, reqBody interface{}, respBody in
 	if respPkg == nil {
 		return NewSystemError(ERROR_TIME_OUT, "request time out")
 	}
-	if respPkg.GetHead().GetRet() < ERROR_MAX_SYSTEM_CODE {
-		return NewSystemError(respPkg.GetHead().GetRet(), respPkg.GetHead().GetMsg())
-	} else {
-		return NewLogicError(respPkg.GetHead().GetRet(), respPkg.GetHead().GetMsg())
+
+	if respPkg.GetHead().GetRet() != 0 {
+		if respPkg.GetHead().GetRet() < ERROR_MAX_SYSTEM_CODE {
+			return NewSystemError(respPkg.GetHead().GetRet(), respPkg.GetHead().GetMsg())
+		} else {
+			return NewLogicError(respPkg.GetHead().GetRet(), respPkg.GetHead().GetMsg())
+		}
 	}
+
 	return respPkg.DecodeBody(respBody)
 
 }
