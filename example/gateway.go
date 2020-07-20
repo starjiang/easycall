@@ -100,7 +100,11 @@ func HttpProxyMiddleware(w http.ResponseWriter, r *http.Request, next *easycall.
 		return
 	}
 
-	if respPkg.GetHead().GetRet() != 0 {
+	if respPkg.GetHead().GetRet() < easycall.ERROR_MAX_SYSTEM_CODE {
+		w.Header().Set("X-Easycall-Ret", strconv.Itoa(respPkg.GetHead().GetRet()))
+		http.Error(w, respPkg.GetHead().GetMsg(), http.StatusInternalServerError)
+		return
+	} else {
 		w.Header().Set("X-Easycall-Ret", strconv.Itoa(respPkg.GetHead().GetRet()))
 		http.Error(w, respPkg.GetHead().GetMsg(), http.StatusBadRequest)
 		return

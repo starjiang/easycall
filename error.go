@@ -7,6 +7,7 @@ const (
 	ERROR_SERVICE_NOT_FOUND = 1002
 	ERROR_INTERNAL_ERROR    = 1001
 	ERROR_TIME_OUT          = 1003
+	ERROR_MAX_SYSTEM_CODE   = 2000 //the max system error code,less than 2000 is system error,more than 2000 is logic error
 )
 
 type LogicError struct {
