@@ -12,7 +12,7 @@ type ApmMonitorHandler interface {
 	OnData(data map[string]*ApmMonitorStatus)
 }
 
-func NewApmMontor(handler ApmMonitorHandler) *ApmMonitor {
+func NewApmMonitor(handler ApmMonitorHandler) *ApmMonitor {
 	apmMonitor := &ApmMonitor{}
 	apmMonitor.handler = handler
 	apmMonitor.interval = APM_COUNT_INTERVAL * time.Second

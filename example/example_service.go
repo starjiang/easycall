@@ -79,6 +79,6 @@ func main() {
 	//context.CreateService("profile1", port+1, &ProfileService{}, 100)
 	//context.AddMiddleware("profile", Middleware1)
 	//context.AddMiddleware("profile", Middleware2)
-	context.AddMiddleware("profile", easycall.NewApmMontor(&ApmReport{"profile"}).Middleware)
+	context.AddMiddleware("profile", easycall.NewApmMonitor(&ApmReport{"profile"}).Middleware)
 	context.StartAndWait()
 }
