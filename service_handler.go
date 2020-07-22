@@ -55,7 +55,7 @@ func (h *ServiceHandler) Dispatch(pkgData []byte, client *EasyConnection) {
 			return
 		}
 
-		req := &Request{reqPkg.GetFormat(), reqPkg.GetHead(), reqPkg.GetBodyData(), time.Now(), client.conn.RemoteAddr().String()}
+		req := &Request{reqPkg.GetFormat(), reqPkg.GetHead(), reqPkg.GetBodyData(), time.Now(), client.conn.RemoteAddr().String(), make(map[string]interface{})}
 		resp := &Response{reqPkg.GetFormat(), reqPkg.GetHead(), nil}
 
 		h.middlewares[0].Middleware(req, resp, client, h.middlewares[0].Next)

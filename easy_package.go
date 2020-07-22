@@ -20,16 +20,16 @@ const (
 
 //EasyHead for EasyPackage
 type EasyHead struct {
-	Service   string `json:"service"`
-	Method    string `json:"method"`
-	RouteKey  string `json:"routeKey"`
-	Token     string `json:"token"`
-	Uid       uint64 `json:"uid"`
-	RequestIp string `json:"requestIp"`
-	TraceId   string `json:"traceId"`
-	Seq       uint64 `json:"seq"`
-	Ret       int    `json:"ret"`
-	Msg       string `json:"msg"`
+	Service   string `json:"service"`   //service name
+	Method    string `json:"method"`    //service method
+	RouteKey  string `json:"routeKey"`  //for hash loadbalnce
+	Token     string `json:"token"`     // user login token
+	Uid       uint64 `json:"uid"`       //user login Uid
+	RequestIp string `json:"requestIp"` //set caller's internet ip address
+	TraceId   string `json:"traceId"`   //traceId for trace request call chain
+	Seq       uint64 `json:"seq"`       //seq for async call
+	Ret       int    `json:"ret"`       //ret code,when process failed,set error code into it
+	Msg       string `json:"msg"`       //msg,when process failed,set errmsg into it
 }
 
 func NewEasyHead() *EasyHead {
@@ -122,11 +122,11 @@ func (head *EasyHead) SetMsg(msg string) *EasyHead {
 
 //EasyPackage for Easycall
 type EasyPackage struct {
-	format   byte
-	head     *EasyHead
-	bodyData []byte
-	pkgData  []byte
-	body     interface{}
+	format   byte        // pkg format 0 for msgpack,1 for json
+	head     *EasyHead   //pkg head
+	bodyData []byte      //pkg body byte array
+	pkgData  []byte      //whole pkg byte array
+	body     interface{} //pkg body decoded
 }
 
 func NewPackageWithBodyData(format byte, head *EasyHead, bodyData []byte) *EasyPackage {
