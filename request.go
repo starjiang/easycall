@@ -11,12 +11,11 @@ import (
 
 //Request for EasyService
 type Request struct {
-	format        byte                   // request package format 0 for MSGPACK,1 for Json
-	head          *EasyHead              //request head struct
-	bodyData      []byte                 //request body byte array
-	createTime    time.Time              //request create time
-	remoteAddress string                 //request remote ip
-	ext           map[string]interface{} //for data transmission among middlewares
+	format     byte                   // request package format 0 for MSGPACK,1 for Json
+	head       *EasyHead              //request head struct
+	bodyData   []byte                 //request body byte array
+	createTime time.Time              //request create time
+	ext        map[string]interface{} //for data transmission among middlewares
 }
 
 func (r *Request) GetBody(body interface{}) error {
@@ -40,10 +39,6 @@ func (r *Request) GetHead() *EasyHead {
 
 func (r *Request) GetCreateTime() time.Time {
 	return r.createTime
-}
-
-func (r *Request) GetRemoteAddress() string {
-	return r.remoteAddress
 }
 
 func (r *Request) GetFormat() byte {

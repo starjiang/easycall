@@ -60,25 +60,19 @@ func (esm *EasySessionManager) DestorySessionAndRespPkg(session *EasySession, re
 	}
 
 	esm.mutex.Lock()
-	defer esm.mutex.Unlock()
+	delete(esm.sessionMap, session.seq)
+	esm.mutex.Unlock()
 
-	_, ok := esm.sessionMap[session.seq]
-
-	if !ok {
-		return
-	}
-
-	atomic.AddInt32(&session.node.Active, -1)
-
+	session.mutex.Lock()
 	if session.respChan != nil {
 		session.respChan <- respPkg
 		close(session.respChan)
 		session.respChan = nil
+		atomic.AddInt32(&session.node.Active, -1)
 	}
 	if session.timer != nil {
 		session.timer.Stop()
 	}
-
-	delete(esm.sessionMap, session.seq)
+	session.mutex.Unlock()
 
 }
