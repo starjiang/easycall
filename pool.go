@@ -97,16 +97,11 @@ func (pool *GenericPool) getOrCreate() (Poolable, error) {
 	}
 
 	if pool.curSize >= pool.maxSize {
-		timeout := make(chan bool, 1)
-		go func() {
-			time.Sleep(time.Second * POOL_MAX_WAIT_TIME)
-			timeout <- true
-		}()
 
 		select {
 		case conn := <-pool.poolChan:
 			return conn, nil
-		case <-timeout:
+		case <-time.After(time.Second * POOL_MAX_WAIT_TIME):
 		}
 		return nil, errors.New("no connection available")
 	}

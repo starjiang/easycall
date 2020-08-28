@@ -3,7 +3,6 @@ module github.com/starjiang/easycall
 go 1.14
 
 require (
-	github.com/aws/aws-sdk-go v1.33.6
 	github.com/coreos/etcd v3.3.22+incompatible
 	github.com/coreos/go-semver v0.3.0 // indirect
 	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf // indirect
